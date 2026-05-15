@@ -1,0 +1,14 @@
+services:
+  smart-service:
+    image: ${SMART_SERVICE_IMAGE:-docker.io/kennydaktyl/smart-service}:${SMART_SERVICE_TAG:-latest}
+    # build:
+    #   context: .
+    container_name: smart-service
+    restart: unless-stopped
+    privileged: true
+    network_mode: host
+    pid: host
+    env_file:
+      - .env
+    volumes:
+      - ./logs:/app/logs:rw
