@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import logging
+from logging.handlers import RotatingFileHandler
+from pathlib import Path
 import shlex
 import socket
 import subprocess
@@ -10,11 +12,32 @@ import urllib.request
 from app.config import Settings, load_settings
 
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s %(levelname)s %(message)s",
-)
 logger = logging.getLogger("smart-service")
+
+
+def configure_logging(settings: Settings) -> None:
+    log_dir = Path(settings.log_dir)
+    log_dir.mkdir(parents=True, exist_ok=True)
+    log_path = log_dir / settings.log_file
+
+    formatter = logging.Formatter("%(asctime)s %(levelname)s %(message)s")
+    handlers: list[logging.Handler] = [
+        logging.StreamHandler(),
+        RotatingFileHandler(
+            log_path,
+            maxBytes=settings.log_max_bytes,
+            backupCount=settings.log_backup_count,
+        ),
+    ]
+
+    root_logger = logging.getLogger()
+    root_logger.handlers.clear()
+    root_logger.setLevel(logging.INFO)
+    for handler in handlers:
+        handler.setFormatter(formatter)
+        root_logger.addHandler(handler)
+
+    logger.info("logging to %s", log_path)
 
 
 def has_socket_connectivity(settings: Settings) -> bool:
@@ -56,6 +79,7 @@ def reboot_host(settings: Settings) -> None:
 
 def run() -> None:
     settings = load_settings()
+    configure_logging(settings)
     logger.info(
         "starting internet watchdog: interval=%ss max_outage=%ss socket=%s:%s http=%s",
         settings.check_interval_seconds,

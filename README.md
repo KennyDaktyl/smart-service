@@ -79,7 +79,11 @@ Bez tego nie zrestartuje hosta.
 
 ```bash
 docker logs -f smart-service
+tail -f logs/smart-service.log
 ```
+
+Logi są zapisywane równolegle do stdout kontenera oraz do pliku `logs/smart-service.log`
+przez wolumen `./logs:/app/logs`.
 
 ## Ważne
 

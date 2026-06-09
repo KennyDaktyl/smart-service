@@ -34,6 +34,10 @@ class Settings:
     http_url: str
     http_timeout_seconds: float
     reboot_command: str
+    log_dir: str
+    log_file: str
+    log_max_bytes: int
+    log_backup_count: int
 
 
 def load_settings() -> Settings:
@@ -49,4 +53,8 @@ def load_settings() -> Settings:
             "REBOOT_COMMAND",
             "nsenter --target 1 --mount --uts --ipc --net --pid /sbin/reboot",
         ),
+        log_dir=_get_str("LOG_DIR", "/app/logs"),
+        log_file=_get_str("LOG_FILE", "smart-service.log"),
+        log_max_bytes=_get_int("LOG_MAX_BYTES", 5_242_880, min_value=1024),
+        log_backup_count=_get_int("LOG_BACKUP_COUNT", 5, min_value=1),
     )
